@@ -1,23 +1,26 @@
 package com.vfu.backend.retrieval;
 
-import com.vfu.backend.llm.service.EmbeddingService;
+import com.vfu.backend.llm.service.IEmbeddingService;
 import com.vfu.backend.model.PolicyVector;
 import com.vfu.backend.model.RetrievedPolicy;
 import com.vfu.backend.repository.PolicyVectorRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class PolicyService {
 
-    private final EmbeddingService embeddingService;
+    private final IEmbeddingService embeddingService;
     private final PolicyVectorRepository repository;
 
     public PolicyService(
-            EmbeddingService embeddingService,
+            IEmbeddingService embeddingService,
             PolicyVectorRepository repository) {
         this.embeddingService = embeddingService;
         this.repository = repository;
@@ -29,25 +32,35 @@ public class PolicyService {
     public void preloadPolicies(String policyText) {
         List<String> chunks = chunkPolicies(policyText);
 
+        List<PolicyVector> allVectors = new ArrayList<>();
+
         int i = 0;
         for (String chunk : chunks) {
-            List<Double> embedding = embeddingService.embed(chunk);
+            List<Double> embedding = embeddingService.embedPolicies(chunk);
+
+            log.info("Preloading {} policy chunks", chunks.size());
+            log.info("Embedding Size {}", embedding.size());
 
             PolicyVector vector = new PolicyVector();
             vector.setId(String.valueOf(i++));
             vector.setText(chunk);
             vector.setEmbedding(embedding);
 
-            repository.save(vector);
+            allVectors.add(vector);  // Collect ALL policies
         }
+
+        // Save ALL policies as single JSON array
+        repository.save(allVectors);  // Changed: pass List, not single vector
+        log.info("Saved {} policy vectors", allVectors.size());
     }
 
     /**
      * Retrieve top-k relevant policy chunks
      */
     public List<RetrievedPolicy> retrieveRelevantPolicies(String question, int k) {
-        List<Double> questionEmbedding =
-                embeddingService.embed(question);
+        List<Double> questionEmbedding = embeddingService.embedQuestion(question);
+
+        log.info("Embedding Size {}", questionEmbedding.size());
 
         return repository.findAll().stream()
                 .map(v -> new RetrievedPolicy(
@@ -62,10 +75,13 @@ public class PolicyService {
     // --- helpers below ---
 
     private List<String> chunkPolicies(String policyText) {
-        return Arrays.stream(policyText.split("\n"))
+        // Split on policy section headers FIRST
+        String[] sections = policyText.split("(?=\\n[A-Z ]+(POLICY|RULES|RESPONSIBILITIES)\\n?)");
+
+        return Arrays.stream(sections)
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private double cosineSimilarity(List<Double> v1, List<Double> v2) {
@@ -75,13 +91,15 @@ public class PolicyService {
             normA += Math.pow(v1.get(i), 2);
             normB += Math.pow(v2.get(i), 2);
         }
+        if (normA == 0 || normB == 0) return 0.0;
+
         return dot / (Math.sqrt(normA) * Math.sqrt(normB));
     }
 
-    public double averageSimilarity(List<RetrievedPolicy> policies) {
+    public double topSimilarity(List<RetrievedPolicy> policies) {
         return policies.stream()
                 .mapToDouble(RetrievedPolicy::similarity)
-                .average()
+                .max()
                 .orElse(0.0);
     }
 

@@ -1,7 +1,6 @@
 package com.vfu.backend.conversation;
 
 import com.vfu.backend.api.dto.ChatResponse;
-import com.vfu.backend.intent.IntentClassifier;
 import com.vfu.backend.llm.service.HuggingFaceChatService;
 import com.vfu.backend.model.RetrievedPolicy;
 import com.vfu.backend.retrieval.PolicyService;
@@ -16,65 +15,43 @@ import java.util.stream.Collectors;
 @Service
 public class OrchestratorService {
 
-    private final IntentClassifier classifier;
     private final PolicyService policyService;
     private final HuggingFaceChatService hfChatService;
 
-    public OrchestratorService(IntentClassifier classifier,
-                               PolicyService policyService, HuggingFaceChatService hfChatService) {
-        this.classifier = classifier;
+    public OrchestratorService(PolicyService policyService, HuggingFaceChatService hfChatService) {
         this.policyService = policyService;
         this.hfChatService = hfChatService;
     }
 
-    public ChatResponse handle(SessionContext ctx, String message) {
+    public ChatResponse handle(SessionContext ctx, String userMessage) {
 
         // 1️ Retrieve relevant policies
-        List<RetrievedPolicy> policies =
-                policyService.retrieveRelevantPolicies(
-                        message, 3);
+        List<RetrievedPolicy> policies = policyService.retrieveRelevantPolicies(userMessage, 3);
+        for(RetrievedPolicy p : policies) {
+            log.info("Retrieved Policy - Similarity: {}", p.similarity());
+        }
 
-        double avgVectorSimilarity =
-                policyService.averageSimilarity(policies);
+        double topVectorSimilarity = policyService.topSimilarity(policies);
+        log.info("topVectorSimilarity: {}", topVectorSimilarity);
+
+        if (topVectorSimilarity < 0.45) {
+            return new ChatResponse(
+                    "I don’t have enough information to answer that. Please contact customer support.",
+                    0.0,
+                    true
+            );
+        }
 
         // 2️ Build prompt
         String policyContext = policies.stream()
-                .map(RetrievedPolicy::text)
-                .collect(Collectors.joining("\n- "));
-
-        String prompt = buildPrompt(
-                message,
-                policyContext
-        );
+                .map(p -> "- " + p.text())
+                .collect(Collectors.joining("\n"));
+        log.debug("policyContext: {}", policyContext);
 
         // 3️ Ask LLM
-        return hfChatService.ask(prompt, avgVectorSimilarity);
+        return hfChatService.ask(policyContext, userMessage, topVectorSimilarity);
 
     }
 
-    private String buildPrompt(String userMessage, String policyContext) {
-
-        return """
-                You are a virtual assistant for a vacation rental company.
-                
-                RULES:
-                - Answer ONLY using the provided policy context.
-                - If the answer is not clearly stated, say you do not have enough information.
-                - Do NOT invent policies.
-                - Be concise and factual.
-                
-                OUTPUT FORMAT (JSON ONLY):
-                {
-                  "answer": "<string>",
-                  "confidence": <number between 0 and 1>
-                }
-                
-                POLICY CONTEXT:
-                %s
-                
-                USER QUESTION:
-                %s
-                """.formatted(policyContext, userMessage);
-    }
 
 }

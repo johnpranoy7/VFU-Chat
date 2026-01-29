@@ -6,9 +6,10 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
-public class RedisConfig {
+public class MyConfig {
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(
@@ -21,6 +22,11 @@ public class RedisConfig {
         template.setValueSerializer(GenericJacksonJsonRedisSerializer.builder().build());
 
         return template;
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }
 
