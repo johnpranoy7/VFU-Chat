@@ -8,6 +8,8 @@ import com.vfu.backend.retrieval.PropertyService;
 import com.vfu.backend.retrieval.ReservationService;
 import com.vfu.backend.session.SessionContext;
 import com.vfu.backend.session.SessionStore;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/session")
 public class SessionController {
@@ -32,7 +35,7 @@ public class SessionController {
     }
 
     @PostMapping("/")
-    public StartSessionResponse start(@RequestBody StartSessionRequest req) {
+    public StartSessionResponse start(@Valid @RequestBody StartSessionRequest req) {
 
         Reservation r = reservations.getReservation(
                 req.reservationNumber(),
@@ -43,6 +46,8 @@ public class SessionController {
 
         String sessionId = UUID.randomUUID().toString();
         store.save(new SessionContext(sessionId, r, p));
+
+        log.info("Starting session for reservation {}", req.reservationNumber());
 
         return new StartSessionResponse(sessionId);
     }

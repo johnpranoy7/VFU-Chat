@@ -1,5 +1,6 @@
 package com.vfu.backend.session;
 
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -14,6 +15,7 @@ public class SessionStore {
 
     public void save(SessionContext ctx) {
         sessions.put(ctx.getSessionId(), ctx);
+        MDC.put("sessionId", ctx.getSessionId());
     }
 
     public Optional<SessionContext> get(String sessionId) {

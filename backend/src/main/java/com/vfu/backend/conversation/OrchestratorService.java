@@ -5,8 +5,11 @@ import com.vfu.backend.intent.Intent;
 import com.vfu.backend.intent.IntentClassifier;
 import com.vfu.backend.retrieval.PolicyService;
 import com.vfu.backend.session.SessionContext;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class OrchestratorService {
 
@@ -47,6 +50,7 @@ public class OrchestratorService {
             default -> "Unsupported";
         };
 
+        log.info("Classified intent as {}", intent);
 
         return new ChatResponse(answer, "HIGH", false);
     }
