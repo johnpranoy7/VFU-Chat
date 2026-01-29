@@ -1,57 +1,80 @@
 package com.vfu.backend.conversation;
 
 import com.vfu.backend.api.dto.ChatResponse;
-import com.vfu.backend.intent.Intent;
 import com.vfu.backend.intent.IntentClassifier;
+import com.vfu.backend.llm.service.HuggingFaceChatService;
+import com.vfu.backend.model.RetrievedPolicy;
 import com.vfu.backend.retrieval.PolicyService;
 import com.vfu.backend.session.SessionContext;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class OrchestratorService {
 
     private final IntentClassifier classifier;
-    private final PolicyService policies;
+    private final PolicyService policyService;
+    private final HuggingFaceChatService hfChatService;
 
     public OrchestratorService(IntentClassifier classifier,
-                               PolicyService policies) {
+                               PolicyService policyService, HuggingFaceChatService hfChatService) {
         this.classifier = classifier;
-        this.policies = policies;
+        this.policyService = policyService;
+        this.hfChatService = hfChatService;
     }
 
     public ChatResponse handle(SessionContext ctx, String message) {
 
-        Intent intent = classifier.classify(message);
+        // 1️ Retrieve relevant policies
+        List<RetrievedPolicy> policies =
+                policyService.retrieveRelevantPolicies(
+                        message, 3);
 
-        if (intent == Intent.UNSUPPORTED) {
-            return new ChatResponse(
-                    "I'm not confident about that. Please contact guest support.",
-                    "LOW",
-                    true
-            );
-        }
+        double avgVectorSimilarity =
+                policyService.averageSimilarity(policies);
 
-        String answer = switch (intent) {
-            case CHECK_IN -> "Check-in is at " + ctx.getReservation().getCheckInTime();
+        // 2️ Build prompt
+        String policyContext = policies.stream()
+                .map(RetrievedPolicy::text)
+                .collect(Collectors.joining("\n- "));
 
-            case CHECK_OUT -> "Check-out is at " + ctx.getReservation().getCheckOutTime();
+        String prompt = buildPrompt(
+                message,
+                policyContext
+        );
 
-            case AMENITIES -> String.join(", ", ctx.getProperty().getAmenities());
+        // 3️ Ask LLM
+        return hfChatService.ask(prompt, avgVectorSimilarity);
 
-            case HOUSE_RULES -> policies.getPolicies();
-
-            case LOCATION -> ctx.getProperty().getAddress();
-
-            case LOCAL_ATTRACTIONS -> "Nearby beaches and harbor boardwalk.";
-
-            default -> "Unsupported";
-        };
-
-        log.info("Classified intent as {}", intent);
-
-        return new ChatResponse(answer, "HIGH", false);
     }
+
+    private String buildPrompt(String userMessage, String policyContext) {
+
+        return """
+                You are a virtual assistant for a vacation rental company.
+                
+                RULES:
+                - Answer ONLY using the provided policy context.
+                - If the answer is not clearly stated, say you do not have enough information.
+                - Do NOT invent policies.
+                - Be concise and factual.
+                
+                OUTPUT FORMAT (JSON ONLY):
+                {
+                  "answer": "<string>",
+                  "confidence": <number between 0 and 1>
+                }
+                
+                POLICY CONTEXT:
+                %s
+                
+                USER QUESTION:
+                %s
+                """.formatted(policyContext, userMessage);
+    }
+
 }
