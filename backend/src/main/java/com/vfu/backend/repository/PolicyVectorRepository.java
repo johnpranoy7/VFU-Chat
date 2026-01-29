@@ -3,29 +3,37 @@ package com.vfu.backend.repository;
 import com.vfu.backend.model.PolicyVector;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
+import tools.jackson.databind.ObjectMapper;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 @Repository
 public class PolicyVectorRepository {
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final ObjectMapper mapper = new ObjectMapper();
 
-    public PolicyVectorRepository(RedisTemplate<String, Object> redisTemplate) {
+    public PolicyVectorRepository(RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
-    public void save(PolicyVector vector) {
-        redisTemplate.opsForValue()
-                .set("policy:" + vector.getId(), vector);
+    public void save(List<PolicyVector> vectors) {
+        try {
+            String json = mapper.writeValueAsString(vectors);
+            redisTemplate.opsForValue().set("policies:all", json);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public List<PolicyVector> findAll() {
-        Set<String> keys = redisTemplate.keys("policy:*");
-        if (keys == null) return List.of();
+        String json = redisTemplate.opsForValue().get("policies:all");
+        if (json == null) return List.of();
 
-        return keys.stream()
-                .map(k -> (PolicyVector) redisTemplate.opsForValue().get(k))
-                .toList();
+        try {
+            return Arrays.asList(mapper.readValue(json, PolicyVector[].class));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
