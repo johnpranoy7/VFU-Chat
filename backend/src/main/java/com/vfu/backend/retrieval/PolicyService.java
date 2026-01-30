@@ -1,8 +1,8 @@
 package com.vfu.backend.retrieval;
 
-import com.vfu.backend.llm.service.IEmbeddingService;
 import com.vfu.backend.model.PolicyVector;
 import com.vfu.backend.model.RetrievedPolicy;
+import com.vfu.backend.orchestrator.JinaEmbeddingOrchestrator;
 import com.vfu.backend.repository.PolicyVectorRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,13 +16,11 @@ import java.util.stream.Collectors;
 @Service
 public class PolicyService {
 
-    private final IEmbeddingService embeddingService;
+    private final JinaEmbeddingOrchestrator jinaEmbeddingOrchestrator;
     private final PolicyVectorRepository repository;
 
-    public PolicyService(
-            IEmbeddingService embeddingService,
-            PolicyVectorRepository repository) {
-        this.embeddingService = embeddingService;
+    public PolicyService(JinaEmbeddingOrchestrator jinaEmbeddingOrchestrator, PolicyVectorRepository repository) {
+        this.jinaEmbeddingOrchestrator = jinaEmbeddingOrchestrator;
         this.repository = repository;
     }
 
@@ -36,7 +34,7 @@ public class PolicyService {
 
         int i = 0;
         for (String chunk : chunks) {
-            List<Double> embedding = embeddingService.embedPolicies(chunk);
+            List<Double> embedding = jinaEmbeddingOrchestrator.embedAndLoadPolicies(chunk);
 
             log.info("Preloading {} policy chunks", chunks.size());
             log.info("Embedding Size {}", embedding.size());
@@ -58,7 +56,7 @@ public class PolicyService {
      * Retrieve top-k relevant policy chunks
      */
     public List<RetrievedPolicy> retrieveRelevantPolicies(String question, int k) {
-        List<Double> questionEmbedding = embeddingService.embedQuestion(question);
+        List<Double> questionEmbedding = jinaEmbeddingOrchestrator.embedQuestion(question);
 
         log.info("Embedding Size {}", questionEmbedding.size());
 

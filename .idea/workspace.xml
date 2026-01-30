@@ -5,22 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4fe55695-61f9-4607-83cc-9f3bc40e79aa" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/llm/IntentType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/llm/service/HuggingFaceClient.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/llm/service/IntentClassifierService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/llm/service/PolicyQaService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/llm/service/ReservationPropertyEnquiryService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/orchestrator/HuggingFaceChatOrchestrator.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/orchestrator/JinaEmbeddingOrchestrator.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/api/controller/AdminController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/api/controller/AdminController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/config/RedisConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/config/MyConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/conversation/OrchestratorService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/conversation/OrchestratorService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/intent/Intent.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/intent/IntentClassifier.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/llm/HuggingFaceClient.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/llm/LlmClient.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/llm/OpenAiClient.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/llm/service/EmbeddingService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/llm/service/IEmbeddingService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/llm/service/HuggingFaceChatService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/llm/service/HuggingFaceChatService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/llm/service/HuggingFaceEmbeddingService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/llm/service/JinaEmbeddingService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/repository/PolicyVectorRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/repository/PolicyVectorRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/api/controller/ChatController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/api/controller/ChatController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/conversation/OrchestratorService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/orchestrator/ChatOrchestrator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/llm/service/HuggingFaceChatService.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/retrieval/PolicyService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/retrieval/PolicyService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,7 +60,7 @@
     "git-widget-placeholder": "master",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
-    "last_directory_selection": "C:/Users/John Pranoy Yalla/OneDrive - Kennesaw State University/Desktop/Sem 5/VFU-Chat/backend/src/main/java/com/vfu/backend/llm",
+    "last_directory_selection": "C:/Users/John Pranoy Yalla/OneDrive - Kennesaw State University/Desktop/Sem 5/VFU-Chat/backend/src/main/java/com/vfu/backend",
     "last_opened_file_path": "C:/Users/John Pranoy Yalla/OneDrive - Kennesaw State University/Desktop/Sem 5/VFU-Chat",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -76,6 +72,11 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.vfu.backend.llm.service" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="BackendApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
@@ -103,7 +104,7 @@
       <option name="presentableId" value="Default" />
       <updated>1769637236546</updated>
       <workItem from="1769637237732" duration="787000" />
-      <workItem from="1769638041924" duration="35288000" />
+      <workItem from="1769638041924" duration="47763000" />
     </task>
     <servers />
   </component>
@@ -136,7 +137,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/backend/src/main/java/com/vfu/backend/api/controller/ChatController.java</url>
-          <line>34</line>
+          <line>35</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>

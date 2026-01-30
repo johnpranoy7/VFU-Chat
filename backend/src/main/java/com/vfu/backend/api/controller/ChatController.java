@@ -2,7 +2,7 @@ package com.vfu.backend.api.controller;
 
 import com.vfu.backend.api.dto.ChatRequest;
 import com.vfu.backend.api.dto.ChatResponse;
-import com.vfu.backend.conversation.OrchestratorService;
+import com.vfu.backend.orchestrator.ChatOrchestrator;
 import com.vfu.backend.session.SessionContext;
 import com.vfu.backend.session.SessionStore;
 import jakarta.validation.Valid;
@@ -18,21 +18,22 @@ import org.springframework.web.bind.annotation.RestController;
 public class ChatController {
 
     private final SessionStore store;
-    private final OrchestratorService orchestrator;
+    private final ChatOrchestrator chatOrchestrator;
 
     public ChatController(SessionStore store,
-                          OrchestratorService orchestrator) {
+                          com.vfu.backend.orchestrator.ChatOrchestrator chatOrchestrator) {
         this.store = store;
-        this.orchestrator = orchestrator;
+        this.chatOrchestrator = chatOrchestrator;
     }
 
     @PostMapping("/")
     public ChatResponse chat(@Valid @RequestBody ChatRequest req) {
 
-        SessionContext ctx = store.get(req.sessionId())
-                .orElseThrow(() -> new RuntimeException("Session expired"));
+//        SessionContext ctx = store.get(req.sessionId())
+//                .orElseThrow(() -> new RuntimeException("Session expired"));
+
         log.info("Received message: {}", req.message());
-        return orchestrator.handle(ctx, req.message());
+        return chatOrchestrator.handleChat(req);
     }
 }
 
